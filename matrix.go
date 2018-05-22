@@ -1,7 +1,6 @@
 package matrix
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -15,7 +14,7 @@ type Matrix struct {
 
 func New(rows, cols int, elements ...Row) (*Matrix, error) {
 	if len(elements) != rows {
-		return nil, errors.New("The number of rows doesn't match the number of rows passed")
+		return nil, fmt.Errorf("The number of elements passed (%d) doesn't match the number of rows (%d)", len(elements), rows)
 	}
 
 	m := &Matrix{
@@ -26,7 +25,7 @@ func New(rows, cols int, elements ...Row) (*Matrix, error) {
 
 	for i := range elements {
 		if len(elements[i]) != cols {
-			return nil, errors.New("The number of columns doesn't match the number of columns passed")
+			return nil, fmt.Errorf("The row number %d doesn't have %d columns", i+1, cols)
 		}
 		m.P[i] = elements[i]
 	}
