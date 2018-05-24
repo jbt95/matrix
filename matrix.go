@@ -4,56 +4,46 @@ import (
 	"fmt"
 )
 
-type Row []float64
-
+//row*ncols + col
 type Matrix struct {
-	P    [][]float64
-	Rows int
-	Cols int
+	data []float64
+	rows int
+	cols int
+	dim  int
 }
 
-func New(rows, cols int, elements ...Row) (*Matrix, error) {
-	if len(elements) != rows {
-		return nil, fmt.Errorf("The number of elements passed (%d) doesn't match the number of rows (%d)", len(elements), rows)
+//Returns a matrix from the given slice or an error if the number of cols and rows does not match the len of the slice
+func NewFromSlice(cols int, rows int, data []float64) (*Matrix, error) {
+	if len(data) != rows*cols {
+		return nil, fmt.Errorf("The size of the matrix rows*cols: (%v) doesn't match the size of the given slice (%v)", rows*cols, len(data))
 	}
-
-	m := &Matrix{
-		Cols: cols,
-		Rows: rows,
-		P:    allocateMatrix(cols, rows),
-	}
-
-	for i := range elements {
-		if len(elements[i]) != cols {
-			return nil, fmt.Errorf("The row number %d doesn't have %d columns", i+1, cols)
-		}
-		m.P[i] = elements[i]
-	}
-
+	m := &Matrix{cols: cols, rows: rows, dim: rows * cols, data: make([]float64, rows*cols)}
+	copy(m.data, data)
 	return m, nil
 }
 
+//Returns an empty matrix
+func NewZeroMatrix(cols, rows int) *Matrix {
+	m := &Matrix{cols: cols, rows: rows, dim: rows * cols, data: make([]float64, rows*cols)}
+	for i := range m.data {
+		m.data[i] = 0
+	}
+	return m
+}
+
 func (m *Matrix) Scalar(a float64) {
-	for i := 0; i < m.Rows; i++ {
-		for j := 0; j < m.Cols; j++ {
-			m.P[i][j] *= a
+	for i := 0; i < m.rows; i++ {
+		for j := 0; j < m.cols; j++ {
+			m.data[i*m.cols+j] *= a
 		}
 	}
 }
 
 func (m *Matrix) Show() {
-	for i := 0; i < m.Rows; i++ {
-		for j := 0; j < m.Cols; j++ {
-			fmt.Printf("%f ", m.P[i][j])
+	for i := 0; i < m.rows; i++ {
+		for j := 0; j < m.cols; j++ {
+			fmt.Print(m.data[i*m.cols+j], " ")
 		}
 		fmt.Println()
 	}
-}
-
-func allocateMatrix(cols, rows int) [][]float64 {
-	p := make([][]float64, rows)
-	for i := 0; i < cols; i++ {
-		p[i] = make([]float64, cols)
-	}
-	return p
 }
