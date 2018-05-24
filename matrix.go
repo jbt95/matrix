@@ -3,6 +3,7 @@ package matrix
 import (
 	"fmt"
 	"log"
+	"sync"
 )
 
 type Matrix struct {
@@ -31,19 +32,24 @@ func NewZeroMatrix(cols, rows int) Matrix {
 	return m
 }
 
-//Dot Product
-func Product(a, b Matrix) Matrix {
+func Dot(a, b Matrix) Matrix {
 	if a.cols != b.rows {
 		log.Fatalf("The number of A cols (%v) doesn't match the number of B cols (%v)", a.cols, b.cols)
 	}
+	var wg sync.WaitGroup
 	c := Matrix{rows: a.rows, cols: b.cols, dim: a.rows * b.cols, data: make([]float64, a.rows*b.cols)}
 	for i := 0; i < a.rows; i++ {
-		for j := 0; j < b.cols; j++ {
-			for k := 0; k < c.cols; k++ {
-				c.data[i*c.cols+k] += a.data[i*a.cols+j] * b.data[j*b.cols+k]
+		wg.Add(1)
+		go func(i int) {
+			for j := 0; j < b.cols; j++ {
+				for k := 0; k < c.cols; k++ {
+					c.data[i*c.cols+k] += a.data[i*a.cols+j] * b.data[j*b.cols+k]
+				}
 			}
-		}
+			wg.Done()
+		}(i)
 	}
+	wg.Wait()
 	return c
 }
 
