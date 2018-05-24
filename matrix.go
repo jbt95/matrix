@@ -52,12 +52,52 @@ func Dot(a, b Matrix) Matrix {
 	return c
 }
 
-func (m Matrix) Scalar(a float64) {
-	for i := 0; i < m.rows; i++ {
-		for j := 0; j < m.cols; j++ {
-			m.data[i*m.cols+j] *= a
-		}
+func (m Matrix) Add(b Matrix) {
+	if len(m.data) != len(b.data) {
+		log.Fatal("invalid matriz size")
 	}
+	var wg sync.WaitGroup
+	for i := 0; i < m.rows; i++ {
+		wg.Add(1)
+		go func(i int) {
+			for j := 0; j < b.cols; j++ {
+				m.data[i*m.cols+j] += b.data[i*b.cols+j]
+			}
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
+}
+
+func (m Matrix) Sub(b Matrix) {
+	if len(m.data) != len(b.data) {
+		log.Fatal("invalid matriz size")
+	}
+	var wg sync.WaitGroup
+	for i := 0; i < m.rows; i++ {
+		wg.Add(1)
+		go func(i int) {
+			for j := 0; j < b.cols; j++ {
+				m.data[i*m.cols+j] -= b.data[i*b.cols+j]
+			}
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
+}
+
+func (m Matrix) Scalar(u float64) {
+	var wg sync.WaitGroup
+	for i := 0; i < m.rows; i++ {
+		wg.Add(1)
+		go func(i int) {
+			for j := 0; j < m.cols; j++ {
+				m.data[i*m.cols+j] *= u
+			}
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
 }
 
 func (m Matrix) Show() {
