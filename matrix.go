@@ -71,7 +71,7 @@ func (m Matrix) Add(b Matrix) {
 
 func (m Matrix) Sub(b Matrix) {
 	if len(m.data) != len(b.data) {
-		log.Fatal("invalid matriz size")
+		log.Fatal("invalid matrix size")
 	}
 	var wg sync.WaitGroup
 	for i := 0; i < m.rows; i++ {
