@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"time"
 )
 
 type Matrix struct {
@@ -18,7 +19,7 @@ func NewFromSlice(cols int, rows int, data []float64) Matrix {
 		log.Fatalf("The size of the matrix rows*cols: (%v) doesn't match the size of the given slice (%v)", rows*cols, len(data))
 	}
 	m := Matrix{cols: cols, rows: rows, data: make([]float64, rows*cols)}
-	copy(m.data, data)
+	m.Set(data)
 	return m
 }
 
@@ -37,6 +38,7 @@ func Dot(a, b Matrix) Matrix {
 	}
 	var wg sync.WaitGroup
 	c := Matrix{rows: a.rows, cols: b.cols, data: make([]float64, a.rows*b.cols)}
+	start := time.Now()
 	for i := 0; i < a.rows; i++ {
 		wg.Add(1)
 		go func(i int) {
@@ -49,6 +51,7 @@ func Dot(a, b Matrix) Matrix {
 		}(i)
 	}
 	wg.Wait()
+	fmt.Println(time.Since(start).Seconds())
 	return c
 }
 
@@ -107,6 +110,14 @@ func (m Matrix) Show() {
 		}
 		fmt.Println()
 	}
+}
+
+//fills the matrix with the given data
+func (m Matrix) Set(data []float64) {
+	if len(data) != m.rows*m.cols {
+		log.Fatalf("The size of the matrix rows*cols: (%v) doesn't match the size of the given slice (%v)", m.rows*m.cols, len(data))
+	}
+	copy(m.data, data)
 }
 
 func (m Matrix) GetRows() int { return m.rows }
