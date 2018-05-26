@@ -103,6 +103,42 @@ func (m Matrix) Scalar(u float64) {
 	wg.Wait()
 }
 
+func (m Matrix) Identity() Matrix {
+	var wg sync.WaitGroup
+	identity := Matrix{rows: m.rows, cols: m.cols, data: make([]float64, m.rows*m.cols)}
+	for i := 0; i < identity.rows; i++ {
+		wg.Add(1)
+		go func(i int) {
+			for j := 0; j < identity.rows; j++ {
+				if j == i {
+					identity.data[i*identity.cols+j] = 1
+					continue
+				}
+				identity.data[i*identity.cols+j] = 0
+			}
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
+	return identity
+}
+
+func (m Matrix) Transpose() Matrix {
+	var wg sync.WaitGroup
+	transpose := Matrix{rows: m.cols, cols: m.rows, data: make([]float64, m.rows*m.cols)}
+	for i := 0; i < m.rows; i++ {
+		wg.Add(1)
+		go func(i int) {
+			for j := 0; j < m.cols; j++ {
+				transpose.data[j*transpose.cols+i] = m.data[i*m.cols+j]
+			}
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
+	return transpose
+}
+
 func (m Matrix) Show() {
 	for i := 0; i < m.rows; i++ {
 		for j := 0; j < m.cols; j++ {
