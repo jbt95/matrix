@@ -31,7 +31,7 @@ func NewZeroMatrix(cols, rows int) Matrix {
 	return m
 }
 
-func Dot(a, b Matrix) Matrix {
+func Product(a, b Matrix) Matrix {
 	if a.cols != b.rows {
 		log.Fatalf("The number of A cols (%v) doesn't match the number of B cols (%v)", a.cols, b.cols)
 	}
@@ -52,52 +52,62 @@ func Dot(a, b Matrix) Matrix {
 	return c
 }
 
-func (m Matrix) Add(b Matrix) {
-	if len(m.data) != len(b.data) {
+func Add(a, b Matrix) Matrix {
+	if len(a.data) != len(b.data) {
 		log.Fatal("invalid matriz size")
 	}
+	c := Matrix{rows: a.rows, cols: a.cols, data: make([]float64, a.rows*a.cols)}
 	var wg sync.WaitGroup
-	for i := 0; i < m.rows; i++ {
+	for i := 0; i < a.rows; i++ {
 		wg.Add(1)
 		go func(i int) {
 			for j := 0; j < b.cols; j++ {
-				m.data[i*m.cols+j] += b.data[i*b.cols+j]
+				c.data[i*c.cols+j] = a.data[i*a.cols+j] + b.data[i*b.cols+j]
 			}
 			wg.Done()
 		}(i)
 	}
 	wg.Wait()
+	return c
 }
 
-func (m Matrix) Sub(b Matrix) {
-	if len(m.data) != len(b.data) {
-		log.Fatal("invalid matrix size")
+func Sub(a, b Matrix) Matrix {
+	if len(a.data) != len(b.data) {
+		log.Fatal("invalid matriz size")
 	}
+	c := Matrix{rows: a.rows, cols: a.cols, data: make([]float64, a.rows*a.cols)}
 	var wg sync.WaitGroup
-	for i := 0; i < m.rows; i++ {
+	for i := 0; i < a.rows; i++ {
 		wg.Add(1)
 		go func(i int) {
 			for j := 0; j < b.cols; j++ {
-				m.data[i*m.cols+j] -= b.data[i*b.cols+j]
+				c.data[i*c.cols+j] = a.data[i*a.cols+j] - b.data[i*b.cols+j]
 			}
 			wg.Done()
 		}(i)
 	}
 	wg.Wait()
+	return c
 }
 
-func (m Matrix) Scalar(u float64) {
-	var wg sync.WaitGroup
-	for i := 0; i < m.rows; i++ {
-		wg.Add(1)
-		go func(i int) {
-			for j := 0; j < m.cols; j++ {
-				m.data[i*m.cols+j] *= u
-			}
-			wg.Done()
-		}(i)
+func (m Matrix) ToSlice() []float64 { return m.data }
+
+func (m Matrix) AddScalar(u float64) {
+	for i := range m.data {
+		m.data[i] += u
 	}
-	wg.Wait()
+}
+
+func (m Matrix) SubScalar(u float64) {
+	for i := range m.data {
+		m.data[i] -= u
+	}
+}
+
+func (m Matrix) ProductScalar(u float64) {
+	for i := range m.data {
+		m.data[i] *= u
+	}
 }
 
 func (m Matrix) Identity() Matrix {
