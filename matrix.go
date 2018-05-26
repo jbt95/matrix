@@ -54,7 +54,7 @@ func Product(a, b Matrix) Matrix {
 
 func Add(a, b Matrix) Matrix {
 	if len(a.data) != len(b.data) {
-		log.Fatal("invalid matriz size")
+		log.Fatal("invalid matrix size")
 	}
 	c := Matrix{rows: a.rows, cols: a.cols, data: make([]float64, a.rows*a.cols)}
 	var wg sync.WaitGroup
@@ -73,7 +73,7 @@ func Add(a, b Matrix) Matrix {
 
 func Sub(a, b Matrix) Matrix {
 	if len(a.data) != len(b.data) {
-		log.Fatal("invalid matriz size")
+		log.Fatal("invalid matrix size")
 	}
 	c := Matrix{rows: a.rows, cols: a.cols, data: make([]float64, a.rows*a.cols)}
 	var wg sync.WaitGroup
