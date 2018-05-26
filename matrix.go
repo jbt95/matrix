@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"sync"
-	"time"
 )
 
 type Matrix struct {
@@ -38,7 +37,6 @@ func Dot(a, b Matrix) Matrix {
 	}
 	var wg sync.WaitGroup
 	c := Matrix{rows: a.rows, cols: b.cols, data: make([]float64, a.rows*b.cols)}
-	start := time.Now()
 	for i := 0; i < a.rows; i++ {
 		wg.Add(1)
 		go func(i int) {
@@ -51,7 +49,6 @@ func Dot(a, b Matrix) Matrix {
 		}(i)
 	}
 	wg.Wait()
-	fmt.Println(time.Since(start).Seconds())
 	return c
 }
 
