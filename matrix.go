@@ -90,26 +90,6 @@ func Sub(a, b Matrix) Matrix {
 	return c
 }
 
-func (m Matrix) ToSlice() []float64 { return m.data }
-
-func (m Matrix) AddScalar(u float64) {
-	for i := range m.data {
-		m.data[i] += u
-	}
-}
-
-func (m Matrix) SubScalar(u float64) {
-	for i := range m.data {
-		m.data[i] -= u
-	}
-}
-
-func (m Matrix) ProductScalar(u float64) {
-	for i := range m.data {
-		m.data[i] *= u
-	}
-}
-
 func (m Matrix) Identity() Matrix {
 	var wg sync.WaitGroup
 	identity := Matrix{rows: m.rows, cols: m.cols, data: make([]float64, m.rows*m.cols)}
@@ -163,5 +143,15 @@ func (m Matrix) Set(data []float64) {
 	copy(m.data, data)
 }
 
-func (m Matrix) GetRows() int { return m.rows }
-func (m Matrix) GetCols() int { return m.cols }
+func (m Matrix) walk(fn func(x float64) float64) {
+	for i := range m.data {
+		m.data[i] = fn(m.data[i])
+	}
+}
+
+func (m Matrix) ProductScalar(u float64) { m.walk(func(x float64) float64 { return x * u }) }
+func (m Matrix) AddScalar(u float64)     { m.walk(func(x float64) float64 { return x + u }) }
+func (m Matrix) SubScalar(u float64)     { m.walk(func(x float64) float64 { return x - u }) }
+func (m Matrix) GetRows() int            { return m.rows }
+func (m Matrix) GetCols() int            { return m.cols }
+func (m Matrix) ToSlice() []float64      { return m.data }
